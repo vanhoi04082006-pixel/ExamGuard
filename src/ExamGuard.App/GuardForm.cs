@@ -61,6 +61,11 @@ public sealed class GuardForm : Form
         Hide();
         ProcessGuard.ClearStopFlag();
 
+        // Register auto-start at logon (idempotent).
+        string? exePath = Environment.ProcessPath;
+        if (!string.IsNullOrEmpty(exePath))
+            AutoStart.Enable(exePath);
+
         // Hold the run mutex for this process's lifetime; the watchdog uses it
         // to detect whether the service is alive.
         try { ServiceMutex.WaitOne(); } catch (AbandonedMutexException) { }
