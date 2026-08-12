@@ -24,21 +24,16 @@ Tài liệu này dành cho giáo viên quản lý phòng thực hành lập trì
 1. Copy **chỉ file** `ExamGuard.exe` vào thư mục ổn định trên máy trạm,
    VD: `C:\Program Files\ExamGuard\` (thư mục phải có quyền ghi vì app lưu
    cấu hình ngay cạnh exe).
-2. **Đặt mật khẩu ngay trên máy này** (làm 1 lần):
-   ```powershell
-   ExamGuard.exe --init
-   ```
-   Nhập mật khẩu (VD: `GvLab@2026`). App tự sinh `examguard.json` tại chỗ.
-   > Ai chạy `--init` là người duy nhất biết mật khẩu. Đừng copy config tạo sẵn
-   > từ máy khác — người tạo sẽ biết mật khẩu.
-   > Nếu quên mật khẩu: chạy `--init` lại để đặt mật khẩu mới (không cần mật khẩu cũ).
-3. Chạy `ExamGuard.exe --service` **một lần**. Lệnh này:
-   - Đăng ký tự khởi động cùng phiên đăng nhập (registry `Run`).
-   - Đăng ký Task Scheduler `ExamGuardWatchdog` (chạy mỗi phút, cứu khi cả
-     service lẫn watchdog bị tắt).
-   - Kích hoạt chống kill (DACL): mọi user thường **không thể** kết thúc tiến trình.
-4. Đăng xuất rồi đăng nhập lại (hoặc khởi động lại máy) → ExamGuard chạy ẩn
-   và tự chặn từ khi vào hệ thống.
+2. **Double-click** file `ExamGuard.exe` **một lần** → hộp thoại **Cài đặt mật
+   khẩu** hiện lên → nhập mật khẩu (VD: `GvLab@2026`) → **Lưu**. Máy thông báo
+   **"ExamGuard đang chạy ẩn và bắt đầu bảo vệ máy"** — thế là xong, app tự đăng
+   ký autostart + watchdog và chạy nền từ giờ.
+   > Ai đặt mật khẩu là người duy nhất biết nó. Đừng copy config tạo sẵn từ máy
+   > khác — người tạo sẽ biết mật khẩu.
+   > Nếu quên mật khẩu: chạy `ExamGuard.exe --init` để đặt mật khẩu mới (không cần
+   > mật khẩu cũ) — lệnh này cũng dùng khi muốn đổi mật khẩu.
+3. (Không bắt buộc) Đăng xuất rồi đăng nhập lại (hoặc khởi động lại máy) → ExamGuard
+   chạy ẩn và tự chặn từ khi vào hệ thống.
 
 ## 4. Kiểm tra nhanh trước giờ thi
 

@@ -34,18 +34,21 @@ Kết quả: `artifacts\ExamGuard-win-x64\ExamGuard.exe`
 
 ## Sử dụng
 ```powershell
-# Chạy dịch vụ (chặn hoạt động ngay)
-ExamGuard.exe --service
+# Cài đặt mới trên 1 máy: double-click ExamGuard.exe (hoặc chạy không có đối số)
+# -> hộp thoại Cài đặt mật khẩu -> Lưu -> app tự chạy ẩn + đăng ký autostart
 
-# Lần đầu / cài lại mật khẩu giáo viên (chạy ngay trên máy cần bảo vệ)
+# Đổi lại mật khẩu giáo viên (quên mật khẩu cũ vẫn được; chạy ngay trên máy cần bảo vệ)
 ExamGuard.exe --init
+
+# Chạy nền thủ công (thường do autostart / Task Scheduler gọi)
+ExamGuard.exe --service
 ```
 
 ### Mật khẩu & cài đặt lần đầu
-- Mật khẩu được đặt **ngay trên máy cần bảo vệ** bằng `ExamGuard.exe --init`
-  (hoặc lần đầu chạy `--service` khi chưa có `examguard.json` thì app tự hiện hộp
-  thoại **Cài đặt mật khẩu**).
-- Ai chạy `--init` là người duy nhất biết mật khẩu — vì vậy hãy đặt trên chính
+- Cài đặt mới: **double-click** `ExamGuard.exe` (hoặc chạy không có đối số). Khi chưa có
+  `examguard.json`, app tự hiện hộp thoại **Cài đặt mật khẩu**; lưu xong hiện thông báo
+  xác nhận rồi tự chạy ẩn, đăng ký autostart + watchdog — không cần gõ lệnh.
+- Ai đặt mật khẩu là người duy nhất biết nó — vì vậy hãy đặt trên chính
   máy giáo viên/máy trạm, **không** tạo sẵn config rồi copy sang (người tạo sẽ
   biết mật khẩu).
 - Mật khẩu được hash SHA-256 + salt, lưu tại `examguard.json` (cùng thư mục exe).

@@ -224,6 +224,12 @@ public sealed class GuardForm : Form
         {
             _config.SetPassword(setup.NewPassword);
             _store.Save(_config);
+            MessageBox.Show(
+                "Đã lưu mật khẩu. ExamGuard đang chạy ẩn và bắt đầu bảo vệ máy.\n\n" +
+                "Mở hộp thoại quản lý bằng tổ hợp phím Ctrl+Alt+Shift+G.",
+                "ExamGuard - Cài đặt hoàn tất",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
         }
         else
         {

@@ -17,6 +17,8 @@ public static class Initializer
             return;
         config.SetPassword(setup.NewPassword);
         store.Save(config);
+        MessageBox.Show("Đã lưu mật khẩu mới.", "ExamGuard",
+            MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 }
 
