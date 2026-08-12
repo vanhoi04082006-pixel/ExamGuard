@@ -37,6 +37,11 @@ ExamGuard.exe --init
 | Notepad: Ctrl+C/Ctrl+V | Không copy/dán được text |
 | Explorer: copy/paste file | Hoạt động bình thường |
 | Nhấn `Ctrl+Alt+Shift+G` | Hiện hộp thoại mật khẩu |
+| Task Manager → chuột phải `ExamGuard` → End task | **"Không truy cập được" (bị từ chối)** — lớp unkillable |
+
+> Kiểm tra nhanh lớp unkillable bằng lệnh (mở bằng user thường, không phải admin):
+> `powershell -c "Get-Process ExamGuard -ErrorAction Stop | Stop-Process -Force -ErrorAction Stop"`
+> → phải báo lỗi *access denied*; nếu nó bị tắt thì watchdog sẽ khởi động lại sau ~2-8s.
 
 ## Giờ thi / khi giao máy
 - Máy đã có sẵn autostart → mở máy là chặn.
@@ -50,6 +55,7 @@ ExamGuard.exe --init
 ## Bảo trì
 - **Đổi mật khẩu**: hotkey → Đổi mật khẩu (cần mật khẩu hiện tại).
 - **Nâng cấp bản mới**: copy file exe mới đè lên, giữ `examguard.json`.
+- **Tạm tắt lớp unkillable (bảo trì)**: sửa `"Unkillable": false` trong `examguard.json` rồi khởi động lại service. Nếu không làm trước, service sẽ **không thể bị `taskkill`/End task** bởi user thường.
 - **Gỡ cài đặt**: xóa thư mục + xóa giá trị `ExamGuard` trong
   `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` + xóa task
   `ExamGuardWatchdog` (lệnh `schtasks /Delete /F /TN ExamGuardWatchdog`).
@@ -59,3 +65,6 @@ ExamGuard.exe --init
   (low-level hook + exe self-contained đôi khi bị nhận nhầm).
 - Nếu chạy với quyền admin (`runas`) trên máy trạm, mọi thao tác text trong app
   admin sẽ không bị chặn — giáo viên nên chạy quyền thường khi phát đề.
+- Lớp unkillable (DACL) **không chặn được user có quyền admin**: admin vẫn có thể
+  lấy quyền sở hữu / đặt lại DACL (Windows cho phép). Với phòng thực hành (học viên
+  không có quyền admin) lớp này là đủ; muốn xoá hoàn toàn hãy tắt `Unkillable`.

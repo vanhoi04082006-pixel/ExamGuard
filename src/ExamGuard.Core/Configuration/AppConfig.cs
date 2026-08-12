@@ -14,6 +14,13 @@ public sealed class AppConfig
 
     public int UnlockMinutes { get; set; } = 60;
 
+    /// <summary>
+    /// When true (default), the service rewrites its own DACL to deny termination
+    /// to everyone, so Task Manager "End task" is refused. Teacher/admin can still
+    /// reset the DACL or disable this flag.
+    /// </summary>
+    public bool Unkillable { get; set; } = true;
+
     public static AppConfig CreateWithPassword(string password)
     {
         var (salt, hash) = PasswordHasher.Hash(password);

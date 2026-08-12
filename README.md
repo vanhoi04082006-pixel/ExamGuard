@@ -10,7 +10,12 @@ Công cụ Windows chạy nền cho phòng thực hành lập trình: **chặn C
 - Hotkey bí mật mặc định: **`Ctrl + Alt + Shift + G`** → mở hộp thoại mật khẩu.
 - Mật khẩu: SHA-256 + salt; sai 3 lần → khóa 30 giây.
 - Khóa tự động khóa lại sau thời gian mở khóa (mặc định 60 phút).
-- Chống tắt 3 lớp: watchdog tự khởi động lại (2s), service định kỳ kiểm tra watchdog (5s), và Task Scheduler cứu khi cả 2 bị giết cùng lúc (~1 phút).
+- Chống tắt 4 lớp:
+  1. **Unkillable** (DACL): service tự ghi đè quyền của chính nó để mọi user bị **Từ chối** quyền kết thúc/treo/chèn tiến trình → Task Manager "End task", `taskkill /F`, `Stop-Process` của user thường **bị từ chối** ngay lập tức.
+  2. Watchdog tiến trình anh em: nếu service vẫn bị giết thì khởi động lại trong ~2-8s.
+  3. Service kiểm tra watchdog định kỳ (5s) và sinh watchdog mới nếu thiếu.
+  4. Task Scheduler (`ExamGuardWatchdog`, mỗi phút): cứu khi cả service lẫn watchdog bị giết cùng lúc (~1 phút).
+- Có thể tắt lớp DACL qua cờ `Unkillable` trong `examguard.json` (mặc định bật).
 - Tự động chạy cùng hệ thống (registry Run).
 - Đóng gói 1 file `.exe` duy nhất.
 
@@ -53,6 +58,7 @@ ExamGuard.exe --init
 ```
 ExamGuard.sln
 ├─ src/ExamGuard.Core/      Lõi: hook, clipboard, cấu hình, bảo mật
+│  └─ Security/ProcessProtector.cs   Ghi đè DACL tiến trình → "unkillable"
 ├─ src/ExamGuard.App/       Giao diện ẩn, watchdog, dialog mật khẩu
 ├─ tests/ExamGuard.Core.Tests/
 ├─ scripts/publish.ps1
@@ -63,5 +69,7 @@ ExamGuard.sln
 - Không chặn chuyển code qua mạng/USB, in ấn, ảnh chụp màn hình + OCR.
 - Tiến trình không chạy quyền admin sẽ không chặn được thao tác trong app chạy **quyền admin**.
 - Menu chuột phải vẫn hiển thị; copy/paste text chỉ không còn tác dụng.
+- Lớp "unkillable" (DACL) chỉ chặn được user **không có quyền admin**. User có quyền admin (hoặc nắm `SeDebugPrivilege`) vẫn kết thúc được tiến trình vì admin luôn có thể lấy lại quyền sở hữu/đặt lại DACL — đây là giới hạn của Windows, không phải lỗ hổng. Muốn mở khoá triệt để: đặt `"Unkillable": false` trong `examguard.json` rồi khởi động lại service.
+- Sau khi bật lớp DACL, service **không còn tự mở lại được chính mình với toàn quyền** (chỉ được query); nếu có nhu cầu đó, tắt `Unkillable`.
 
 Xem chi tiết triển khai ở `docs/DEPLOYMENT.md` và kế hoạch kiểm thử ở `docs/TESTPLAN.md`.

@@ -16,7 +16,7 @@ Tiện ích Windows chạy nền phục vụ phòng thực hành lập trình:
 | Nhận dạng File Explorer | Whitelist window class: `CabinetWClass`, `Progman`, `WorkerW` |
 | Ẩn & quản lý | Không window/tray; hotkey `Ctrl+Alt+Shift+G` |
 | Mật khẩu | SHA-256 + salt, lưu `examguard.json`, 3 lần sai → khóa 30s |
-| Chống tắt | Watchdog 2 tiến trình (mutex) |
+| Chống tắt | 4 lớp: DACL "unkillable" (mọi user bị từ chối kill) + watchdog 2 tiến trình + kiểm tra chéo 5s + Task Scheduler mỗi phút |
 | Autostart | Registry `HKCU\...\Run` |
 | Đóng gói | `dotnet publish` self-contained single-file (~49 MB) |
 
@@ -29,7 +29,8 @@ Tiện ích Windows chạy nền phục vụ phòng thực hành lập trình:
 ExamGuard.sln
 ├─ src/ExamGuard.Core/      NativeMethods, KeyboardHook, ClipboardGuard,
 │                           ForegroundWindow, AppConfig, ConfigStore,
-│                           PasswordHasher, AutoStart, ProcessGuard
+│                           PasswordHasher, AutoStart, ProcessGuard,
+│                           Security/ProcessProtector (DACL unkillable)
 ├─ src/ExamGuard.App/       Program, GuardForm (ẩn), PasswordDialog,
 │                           Watchdog, Initializer, LockoutGuard
 ├─ tests/ExamGuard.Core.Tests/  xUnit
@@ -48,10 +49,17 @@ ExamGuard.sln
 - [x] 14 unit test pass
 - [x] Publish 1 file .exe (49.2 MB)
 - [x] Smoke test: chạy ẩn, watchdog tự khởi động lại, thoát sạch
+- [x] Lớp "unkillable" (DACL): deny Everyone terminate/suspend/inject, ACE deny đặt trước ACE allow
+- [x] Kiểm chứng unkillable: user thường (Task Manager "End task", `taskkill`, `Stop-Process`) bị từ chối (access denied); watchdog vẫn restart service khi bị giết
 - [x] Tài liệu README / DEPLOYMENT / TESTPLAN
+
+## Lưu ý vận hành
+- Cờ `"Unkillable"` trong `examguard.json` (mặc định `true`): bật/tắt lớp DACL khi cần gỡ rối hay bảo trì, vì khi bật, tiến trình không thể bị kết thúc từ bên ngoài (kể cả bằng `taskkill /F`).
+- Tắt lớp DACL không làm mất các lớp watchdog — service vẫn tự phục hồi khi bị giết.
 
 ## Giới hạn đã biết (documented)
 - Menu chuột phải vẫn hiện nhưng copy/paste text không có tác dụng (không dùng DLL injection).
 - Clipboard chứa cả text lẫn ảnh → bị xóa toàn bộ.
 - Hook của tiến trình không nâng quyền không chặn được thao tác trong app chạy quyền admin.
+- DACL "unkillable" chỉ chặn user không có quyền admin; admin/`SeDebugPrivilege` vẫn kill được (đặt lại DACL/ownership) — xem README.
 - Chưa chống: gửi code qua mạng/USB, in ấn, chụp màn hình → OCR.

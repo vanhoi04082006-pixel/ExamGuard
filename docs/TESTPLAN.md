@@ -46,12 +46,32 @@ dotnet test ExamGuard.sln
 | 25 | Khởi động 2 bản --service cùng lúc | Bản thứ 2 tự thoát, không sinh zombie | |
 | 26 | Khởi động lại máy | Tự chạy ẩn sau đăng nhập | |
 
-### B4. Đóng gói
+### B4. Lớp "unkillable" (DACL)
+| # | Thao tác (bằng user thường, KHÔNG admin) | Kết quả mong đợi | Pass? |
+|---|---|---|---|
+| 26a | `taskkill /F /IM ExamGuard.exe` | Bị từ chối (access denied), service còn sống | ✅ |
+| 26b | `Stop-Process -Id <service> -Force` | Bị từ chối (access denied) | ✅ |
+| 26c | Task Manager → End task tiến trình service | Báo "không truy cập được", không tắt | |
+| 26d | Giết tiến trình **watchdog** (không được bảo vệ) | Service sinh watchdog mới trong ~5s | |
+| 26e | Admin `runas` kill service | **Có thể kill** (giới hạn Windows, không phải lỗi) | ✅ |
+| 26f | Đặt `"Unkillable": false` → khởi động lại service → kill | Kill được bình thường (đã tắt lớp DACL) | |
+
+Ghi chú kiểm chứng thực tế (phiên QA 12/08):
+- DACL áp lên process được xác nhận qua đọc lại ACL: ACE[0] = DENY Everyone
+  `0x82B` (terminate/suspend/create-thread/vm-op/vm-write), ACE[1] = ALLOW
+  `0x21000` (read-control/query).
+- User thường (Basic User trust level): `OpenProcess(PROCESS_TERMINATE)` → err 5
+  (access denied), tiến trình sống.
+- Log service: `unkillable=True`; watchdog `restarting service` hoạt động đúng.
+
+### B5. Đóng gói
 | # | Kiểm tra | Kết quả mong đợi | Pass? |
 |---|---|---|---|
 | 27 | `artifacts\...\ExamGuard.exe` | 1 file duy nhất, tự chạy trên máy không cài .NET | |
-| 28 | Chạy trên Windows 11 sạch (VM) | Toàn bộ B1-B3 OK | |
+| 28 | Chạy trên Windows 11 sạch (VM) | Toàn bộ B1-B4 OK | |
 
 ## C. Ghi chú khi fail
 - Ghi lại app đang test, phiên bản Windows, log nếu có.
 - Phân biệt "không chặn" do: app chạy quyền admin / cửa sổ nền tảng khác / lỗi hook.
+- Khi test lớp unkillable: **phải test bằng user thường**. Nếu test từ shell admin, việc kill thành công là bình thường (admin bypass DACL), không phải lỗi.
+- Nếu End task vẫn tắt được tiến trình bằng user thường → kiểm tra log có dòng `unkillable=True`; nếu `False`/thiếu → đã tắt cờ `Unkillable` hoặc lỗi P/Invoke.

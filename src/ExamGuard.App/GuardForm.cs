@@ -6,6 +6,7 @@ using ExamGuard.Core.Configuration;
 using ExamGuard.Core.Hooks;
 using ExamGuard.Core.Interop;
 using ExamGuard.Core.Misc;
+using ExamGuard.Core.Security;
 
 namespace ExamGuard.App;
 
@@ -89,6 +90,13 @@ public sealed class GuardForm : Form
                 Close();
                 return;
             }
+        }
+
+        // Make the process unkillable from Task Manager / taskkill.
+        if (_config.Unkillable)
+        {
+            bool protected_ = ProcessProtector.EnableUnkillable();
+            FileLog.Write($"unkillable={protected_}");
         }
 
         string? exePath = Environment.ProcessPath;
