@@ -11,24 +11,32 @@ powershell -ExecutionPolicy Bypass -File scripts\publish.ps1
 ```
 Lấy file: `artifacts\ExamGuard-win-x64\ExamGuard.exe` (1 file duy nhất).
 
-## Bước 2 - Cài đặt mật khẩu giáo viên (1 lần, máy phát triển)
-Trước khi copy sang máy trạm, tạo mật khẩu trước:
-```powershell
-ExamGuard.exe --init
-```
-Đặt mật khẩu (VD: `GvLab@2026`). Sinh ra `examguard.json` cùng thư mục.
-
-> Muốn đổi sau này: chạy `--init` lại hoặc qua hotkey → "Đổi mật khẩu".
-
-## Bước 3 - Copy & bật tự khởi động
-1. Copy `ExamGuard.exe` + `examguard.json` vào thư mục ổn định trên máy trạm,
+## Bước 2 - Copy & đặt mật khẩu NGAY TRÊN máy trạm
+1. Copy **chỉ file** `ExamGuard.exe` vào thư mục ổn định trên máy trạm,
    VD: `C:\Program Files\ExamGuard\`.
    (Chỉ cần quyền ghi thư mục đó vì app ghi file cấu hình cạnh exe.)
-2. Chạy `ExamGuard.exe --service` một lần để bật autostart
-   (viết registry `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`) và đăng ký
-   **Task Scheduler** `ExamGuardWatchdog` (chạy mỗi phút, dùng để cứu hệ thống khi
-   cả service lẫn watchdog bị giết).
-3. Đăng xuất/đăng nhập lại → ExamGuard tự chạy ẩn cùng phiên làm việc.
+2. Trên **chính máy trạm đó**, chạy lệnh sau (1 lần) để đặt mật khẩu giáo viên:
+   ```powershell
+   ExamGuard.exe --init
+   ```
+   Nhập mật khẩu (VD: `GvLab@2026`). App tự sinh `examguard.json` ngay tại chỗ.
+
+> **Vì sao phải tạo mật khẩu ngay trên máy trạm?** Ai chạy `--init` là người duy nhất
+> biết mật khẩu. Nếu tạo sẵn config ở máy khác rồi copy sang, người tạo cũng biết mật
+> khẩu — không còn bí mật với giáo viên máy trạm. `examguard.json` chỉ chứa hash + salt,
+> không đọc ngược ra được mật khẩu.
+
+> Muốn đổi sau này: chạy `--init` lại (không cần mật khẩu cũ) hoặc qua hotkey → "Đổi mật khẩu".
+
+## Bước 3 - Bật tự khởi động
+Chạy `ExamGuard.exe --service` một lần để bật autostart
+(viết registry `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`) và đăng ký
+**Task Scheduler** `ExamGuardWatchdog` (chạy mỗi phút, dùng để cứu hệ thống khi
+cả service lẫn watchdog bị giết).
+Đăng xuất/đăng nhập lại → ExamGuard tự chạy ẩn cùng phiên làm việc.
+
+> Nếu chưa có `examguard.json` mà chạy `--service` luôn, app cũng tự hiện hộp thoại
+> **Cài đặt mật khẩu** — tương đương `--init`.
 
 ## Bước 4 - Kiểm tra nhanh tại chỗ
 | Kiểm tra | Kết quả mong đợi |

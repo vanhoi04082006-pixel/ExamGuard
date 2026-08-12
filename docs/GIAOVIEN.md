@@ -5,36 +5,39 @@ Tài liệu này dành cho giáo viên quản lý phòng thực hành lập trì
 
 ## 1. Các khái niệm
 
-- **Máy phát triển**: máy của giáo viên, dùng để tạo ra file `ExamGuard.exe`
-  và đặt mật khẩu. Chỉ cần làm **một lần**.
-- **Máy trạm**: máy học viên trong phòng thực hành. Chỉ cần copy 2 file vào và
-  chạy; từ đó mọi copy/paste văn bản (code) đều bị chặn.
+- **Máy phát triển**: máy dùng để build ra file `ExamGuard.exe` (chỉ làm **một lần**).
+  Không cần đặt mật khẩu ở đây.
+- **Máy trạm**: máy học viên trong phòng thực hành. Copy **chỉ file** `ExamGuard.exe`
+  vào, rồi **đặt mật khẩu ngay trên máy đó** (`--init`); từ đó mọi copy/paste văn bản
+  (code) đều bị chặn.
 
-## 2. Chuẩn bị (máy phát triển, làm 1 lần)
+## 2. Chuẩn bị file cài đặt (máy phát triển, làm 1 lần)
 
 1. Mở **PowerShell**, đến thư mục dự án, chạy:
    ```powershell
    powershell -ExecutionPolicy Bypass -File scripts\publish.ps1
    ```
 2. Lấy file kết quả: `artifacts\ExamGuard-win-x64\ExamGuard.exe`.
-3. Đặt mật khẩu giáo viên:
-   ```powershell
-   ExamGuard.exe --init
-   ```
-   Nhập mật khẩu (VD: `GvLab@2026`). Sinh ra file `examguard.json` ngay cạnh exe.
-   > Nếu quên mật khẩu: chạy `--init` lại để đặt mật khẩu mới (không cần mật khẩu cũ).
 
 ## 3. Triển khai lên từng máy trạm
 
-1. Copy **2 file** `ExamGuard.exe` và `examguard.json` vào thư mục ổn định,
+1. Copy **chỉ file** `ExamGuard.exe` vào thư mục ổn định trên máy trạm,
    VD: `C:\Program Files\ExamGuard\` (thư mục phải có quyền ghi vì app lưu
    cấu hình ngay cạnh exe).
-2. Chạy `ExamGuard.exe --service` **một lần**. Lệnh này:
+2. **Đặt mật khẩu ngay trên máy này** (làm 1 lần):
+   ```powershell
+   ExamGuard.exe --init
+   ```
+   Nhập mật khẩu (VD: `GvLab@2026`). App tự sinh `examguard.json` tại chỗ.
+   > Ai chạy `--init` là người duy nhất biết mật khẩu. Đừng copy config tạo sẵn
+   > từ máy khác — người tạo sẽ biết mật khẩu.
+   > Nếu quên mật khẩu: chạy `--init` lại để đặt mật khẩu mới (không cần mật khẩu cũ).
+3. Chạy `ExamGuard.exe --service` **một lần**. Lệnh này:
    - Đăng ký tự khởi động cùng phiên đăng nhập (registry `Run`).
    - Đăng ký Task Scheduler `ExamGuardWatchdog` (chạy mỗi phút, cứu khi cả
      service lẫn watchdog bị tắt).
    - Kích hoạt chống kill (DACL): mọi user thường **không thể** kết thúc tiến trình.
-3. Đăng xuất rồi đăng nhập lại (hoặc khởi động lại máy) → ExamGuard chạy ẩn
+4. Đăng xuất rồi đăng nhập lại (hoặc khởi động lại máy) → ExamGuard chạy ẩn
    và tự chặn từ khi vào hệ thống.
 
 ## 4. Kiểm tra nhanh trước giờ thi

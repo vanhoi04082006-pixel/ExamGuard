@@ -37,13 +37,17 @@ Kết quả: `artifacts\ExamGuard-win-x64\ExamGuard.exe`
 # Chạy dịch vụ (chặn hoạt động ngay)
 ExamGuard.exe --service
 
-# Lần đầu / cài lại mật khẩu giáo viên
+# Lần đầu / cài lại mật khẩu giáo viên (chạy ngay trên máy cần bảo vệ)
 ExamGuard.exe --init
 ```
 
-### Mật khẩu mặc định & cài đặt lần đầu
-- Lần đầu chạy không có file `examguard.json`, chương trình tự hiện hộp thoại **Cài đặt mật khẩu**.
-- Có thể chạy trước `ExamGuard.exe --init` để cài mật khẩu rồi mới deploy.
+### Mật khẩu & cài đặt lần đầu
+- Mật khẩu được đặt **ngay trên máy cần bảo vệ** bằng `ExamGuard.exe --init`
+  (hoặc lần đầu chạy `--service` khi chưa có `examguard.json` thì app tự hiện hộp
+  thoại **Cài đặt mật khẩu**).
+- Ai chạy `--init` là người duy nhất biết mật khẩu — vì vậy hãy đặt trên chính
+  máy giáo viên/máy trạm, **không** tạo sẵn config rồi copy sang (người tạo sẽ
+  biết mật khẩu).
 - Mật khẩu được hash SHA-256 + salt, lưu tại `examguard.json` (cùng thư mục exe).
 
 ### Thao tác giáo viên
