@@ -24,6 +24,7 @@ public static class Initializer
 
 internal sealed class SetupPasswordForm : Form
 {
+    private static readonly Color Accent = Color.FromArgb(37, 99, 235);
     private readonly TextBox _txtNew = new();
     private readonly TextBox _txtConfirm = new();
 
@@ -32,29 +33,86 @@ internal sealed class SetupPasswordForm : Form
     public SetupPasswordForm()
     {
         Text = "ExamGuard - Cài đặt mật khẩu";
-        FormBorderStyle = FormBorderStyle.FixedSingle;
+        FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = false;
+        ShowIcon = false;
         StartPosition = FormStartPosition.CenterScreen;
-        Width = 380;
-        Height = 210;
+        AutoSize = true;
+        AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        Font = new Font("Segoe UI", 9F);
 
-        Controls.Add(new Label { Text = "Mật khẩu giáo viên mới:", AutoSize = true, Location = new Point(24, 20) });
-        _txtNew.Location = new Point(24, 44);
+        var root = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            Padding = new Padding(24, 18, 24, 16),
+            ColumnCount = 1,
+            RowCount = 5,
+        };
+        root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        for (int i = 0; i < root.RowCount; i++)
+            root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        Controls.Add(root);
+
+        root.Controls.Add(new Label
+        {
+            Text = "Mật khẩu giáo viên mới",
+            AutoSize = true,
+            Margin = new Padding(0, 0, 0, 6),
+        }, 0, 0);
         _txtNew.Width = 320;
+        _txtNew.Height = 30;
         _txtNew.UseSystemPasswordChar = true;
-        Controls.Add(_txtNew);
+        _txtNew.Margin = new Padding(0, 0, 0, 12);
+        root.Controls.Add(_txtNew, 0, 1);
 
-        Controls.Add(new Label { Text = "Xác nhận mật khẩu:", AutoSize = true, Location = new Point(24, 76) });
-        _txtConfirm.Location = new Point(24, 100);
+        root.Controls.Add(new Label
+        {
+            Text = "Xác nhận mật khẩu",
+            AutoSize = true,
+            Margin = new Padding(0, 0, 0, 6),
+        }, 0, 2);
         _txtConfirm.Width = 320;
+        _txtConfirm.Height = 30;
         _txtConfirm.UseSystemPasswordChar = true;
-        Controls.Add(_txtConfirm);
+        _txtConfirm.Margin = new Padding(0, 0, 0, 16);
+        root.Controls.Add(_txtConfirm, 0, 3);
 
-        var ok = new Button { Text = "Lưu", Location = new Point(24, 140), Width = 120, DialogResult = DialogResult.OK };
-        var cancel = new Button { Text = "Hủy", Location = new Point(204, 140), Width = 120, DialogResult = DialogResult.Cancel };
-        Controls.Add(ok);
-        Controls.Add(cancel);
+        var buttonRow = new FlowLayoutPanel
+        {
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            FlowDirection = FlowDirection.RightToLeft,
+            WrapContents = false,
+        };
+        var cancel = new Button
+        {
+            Text = "Hủy",
+            Width = 100,
+            Height = 32,
+            FlatStyle = FlatStyle.Flat,
+            Margin = new Padding(10, 0, 0, 0),
+        };
+        cancel.FlatAppearance.BorderSize = 0;
+        cancel.UseVisualStyleBackColor = true;
+        cancel.DialogResult = DialogResult.Cancel;
+        var ok = new Button
+        {
+            Text = "Lưu",
+            Width = 100,
+            Height = 32,
+            FlatStyle = FlatStyle.Flat,
+            BackColor = Accent,
+            ForeColor = Color.White,
+        };
+        ok.FlatAppearance.BorderSize = 0;
+        ok.FlatAppearance.MouseOverBackColor = ControlPaint.Light(ok.BackColor);
+        ok.DialogResult = DialogResult.OK;
+        buttonRow.Controls.Add(cancel);
+        buttonRow.Controls.Add(ok);
+        root.Controls.Add(buttonRow, 0, 4);
 
         FormClosing += (_, e) =>
         {
