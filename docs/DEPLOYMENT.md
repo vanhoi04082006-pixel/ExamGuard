@@ -49,8 +49,10 @@ ExamGuard.exe --init
   (chương trình khóa lại tự động sau thời gian mở khóa).
 
 ## Khi hết giờ / muốn tắt
-- Nhấn `Ctrl+Alt+Shift+G` → nhập mật khẩu → **Thoát**.
-- Thao tác này cũng ghi cờ dừng để watchdog không khởi động lại.
+- Nhấn `Ctrl+Alt+Shift+G` → nhập mật khẩu → **Thoát hẳn**.
+- Thao tác này ghi cờ dừng (watchdog không khởi động lại), xóa task watchdog **và**
+  xóa autostart trong registry `Run` → máy reboot sẽ **không** tự chặn lại nữa.
+- Muốn kích hoạt lại: chạy tay `ExamGuard.exe --service` (tự bật lại autostart + watchdog).
 
 ## Bảo trì
 - **Đổi mật khẩu**: hotkey → Đổi mật khẩu (cần mật khẩu hiện tại).

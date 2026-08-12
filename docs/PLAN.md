@@ -32,7 +32,7 @@ ExamGuard.sln
 │                           PasswordHasher, AutoStart, ProcessGuard,
 │                           Security/ProcessProtector (DACL unkillable)
 ├─ src/ExamGuard.App/       Program, GuardForm (ẩn), PasswordDialog,
-│                           Watchdog, Initializer, LockoutGuard
+│                           Watchdog, SelfDelete, Initializer, LockoutGuard
 ├─ tests/ExamGuard.Core.Tests/  xUnit
 ├─ scripts/publish.ps1      đóng gói 1 file exe
 └─ docs/                    README, GIAOVIEN, DEPLOYMENT, TESTPLAN

@@ -50,14 +50,17 @@ Tài liệu này dành cho giáo viên quản lý phòng thực hành lập trì
 ## 5. Thao tác trong giờ thi
 
 Mọi thao tác đều bắt đầu bằng tổ hợp phím bí mật **`Ctrl+Alt+Shift+G`**
-(nếu bận, chương trình tự dùng `Ctrl+Alt+G` hoặc `Ctrl+Shift+G`).
+(nếu bận, chương trình tự dùng `Ctrl+Alt+G` hoặc `Ctrl+Shift+G`). Hộp thoại có
+4 nút: **Mở khóa** (kèm ô chọn thời gian), **Thoát hẳn**, **Đổi mật khẩu** và
+**Xóa toàn bộ**.
 
 | Nhu cầu | Cách làm |
 |---|---|
-| Cho sinh viên copy/paste tạm thời | Hotkey → nhập mật khẩu → **Mở khóa** (tự khóa lại sau 60 phút) |
-| Hết giờ, tắt hẳn | Hotkey → nhập mật khẩu → **Thoát** (watchdog không khởi động lại) |
+| Cho sinh viên copy/paste tạm thời | Hotkey → nhập mật khẩu → chọn thời gian (5/10/15/30/60/120 phút) → **Mở khóa** (hết giờ tự khóa lại) |
+| Hết giờ, tắt hẳn | Hotkey → nhập mật khẩu → **Thoát hẳn** (xóa autostart + watchdog; reboot không tự chạy lại) |
 | Đổi mật khẩu | Hotkey → nhập mật khẩu hiện tại → **Đổi mật khẩu** |
-| Khi máy đang mở khóa | Lặp lại hotkey + mật khẩu → **Mở khóa** lại để gia hạn thời gian |
+| Khi máy đang mở khóa | Lặp lại hotkey + mật khẩu → chọn thời gian → **Mở khóa** để gia hạn |
+| Xóa toàn bộ ExamGuard | Hotkey → nhập mật khẩu → **Xóa toàn bộ** → xác nhận (xóa mọi file, cấu hình, autostart, watchdog trên máy này) |
 
 ## 6. Bảo trì
 

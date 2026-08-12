@@ -192,12 +192,20 @@ public sealed class GuardForm : Form
             {
                 case PasswordAction.Unlock:
                     _unlocked = true;
-                    _relockTimer.Interval = Math.Max(1, _config.UnlockMinutes) * 60_000;
+                    _relockTimer.Interval = Math.Max(1, dlg.UnlockDurationMinutes) * 60_000;
                     _relockTimer.Start();
                     break;
                 case PasswordAction.Exit:
+                    // Stop permanently: no watchdog restart, no scheduled task, and
+                    // remove the Run autostart entry so it does not come back on reboot.
                     ProcessGuard.WriteStopFlag();
                     TaskSchedulerHelper.Remove();
+                    AutoStart.Disable();
+                    _exiting = true;
+                    Close();
+                    break;
+                case PasswordAction.DeleteAll:
+                    SelfDelete.Run();
                     _exiting = true;
                     Close();
                     break;

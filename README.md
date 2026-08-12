@@ -50,9 +50,10 @@ ExamGuard.exe --init
 | Thao tác | Cách làm |
 |---|---|
 | Mở hộp thoại quản lý | Nhấn `Ctrl+Alt+Shift+G` |
-| Mở khóa tạm thời | Nhập mật khẩu → **Mở khóa** (tự khóa lại sau 60 phút) |
-| Thoát hẳn | Nhập mật khẩu → **Thoát** (kèm watchdog tắt theo) |
+| Mở khóa tạm thời | Nhập mật khẩu → chọn thời gian (5–120 phút) → **Mở khóa** (hết giờ tự khóa lại) |
+| Thoát hẳn | Nhập mật khẩu → **Thoát hẳn** (xóa autostart + watchdog, reboot không chạy lại) |
 | Đổi mật khẩu | Nhập mật khẩu hiện tại → **Đổi mật khẩu** |
+| Xóa toàn bộ | Nhập mật khẩu → **Xóa toàn bộ** → xác nhận (xóa mọi file, cấu hình, autostart, watchdog) |
 
 ## Cấu trúc
 ```

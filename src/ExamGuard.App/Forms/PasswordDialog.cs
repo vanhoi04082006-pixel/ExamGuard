@@ -7,22 +7,29 @@ public enum PasswordAction
 {
     None,
     Unlock,
-    Exit
+    Exit,
+    DeleteAll
 }
 
 /// <summary>
 /// Password-protected control dialog. All privileged actions (unlock, change
-/// password, exit) require the teacher password.
+/// password, exit, delete everything) require the teacher password.
 /// </summary>
 public sealed class PasswordDialog : Form
 {
+    private static readonly string[] DurationPresets = { "5", "10", "15", "30", "60", "120" };
+
     private readonly AppConfig _config;
     private readonly ConfigStore _store;
     private readonly LockoutGuard _lockout;
     private TextBox _txtPassword = null!;
+    private ComboBox _cboMinutes = null!;
     private Label _lblStatus = null!;
 
     public PasswordAction Result { get; private set; } = PasswordAction.None;
+
+    /// <summary>Minutes the temporary unlock should last (when Result == Unlock).</summary>
+    public int UnlockDurationMinutes { get; private set; }
 
     public PasswordDialog(AppConfig config, ConfigStore store, LockoutGuard lockout)
     {
@@ -36,48 +43,69 @@ public sealed class PasswordDialog : Form
         MinimizeBox = false;
         ShowInTaskbar = false;
         StartPosition = FormStartPosition.CenterScreen;
-        Width = 380;
-        Height = 210;
+        Width = 400;
+        Height = 258;
         TopMost = true;
 
-        var lbl = new Label
+        Controls.Add(new Label
         {
             Text = "Nhập mật khẩu giáo viên:",
             AutoSize = true,
             Location = new Point(24, 20)
-        };
+        });
 
         _txtPassword = new TextBox
         {
-            Location = new Point(24, 48),
-            Width = 320,
+            Location = new Point(24, 44),
+            Width = 340,
             UseSystemPasswordChar = true
         };
         _txtPassword.KeyDown += (_, e) =>
         {
             if (e.KeyCode == Keys.Enter) TryVerify(PasswordAction.Unlock);
         };
+        Controls.Add(_txtPassword);
 
-        _btnUnlock = CreateButton("Mở khóa", 24, 92, 100);
+        Controls.Add(new Label
+        {
+            Text = "Thời gian mở khóa:",
+            AutoSize = true,
+            Location = new Point(24, 76)
+        });
+
+        _cboMinutes = new ComboBox
+        {
+            Location = new Point(24, 96),
+            Width = 150,
+            DropDownStyle = ComboBoxStyle.DropDownList
+        };
+        _cboMinutes.Items.AddRange(DurationPresets);
+        int def = Array.IndexOf(DurationPresets, Math.Max(1, _config.UnlockMinutes).ToString());
+        _cboMinutes.SelectedIndex = def >= 0 ? def : Array.IndexOf(DurationPresets, "60");
+        Controls.Add(_cboMinutes);
+
+        _btnUnlock = CreateButton("Mở khóa", 24, 134, 104);
         _btnUnlock.Click += (_, _) => TryVerify(PasswordAction.Unlock);
-        _btnExit = CreateButton("Thoát", 138, 92, 100);
+        _btnExit = CreateButton("Thoát hẳn", 138, 134, 104);
         _btnExit.Click += (_, _) => TryVerify(PasswordAction.Exit);
-        _btnChange = CreateButton("Đổi mật khẩu", 252, 92, 100);
+        _btnChange = CreateButton("Đổi mật khẩu", 252, 134, 104);
         _btnChange.Click += (_, _) => ChangePasswordFlow();
+        _btnDelete = CreateButton("Xóa toàn bộ", 24, 168, 332);
+        _btnDelete.ForeColor = Color.Firebrick;
+        _btnDelete.Click += (_, _) => TryVerify(PasswordAction.DeleteAll);
 
         _lblStatus = new Label
         {
             Text = string.Empty,
             AutoSize = true,
             ForeColor = Color.Firebrick,
-            Location = new Point(24, 138)
+            Location = new Point(24, 206)
         };
 
-        Controls.Add(lbl);
-        Controls.Add(_txtPassword);
         Controls.Add(_btnUnlock);
         Controls.Add(_btnExit);
         Controls.Add(_btnChange);
+        Controls.Add(_btnDelete);
         Controls.Add(_lblStatus);
 
         Shown += (_, _) => _txtPassword.Focus();
@@ -86,6 +114,7 @@ public sealed class PasswordDialog : Form
     private Button _btnUnlock = null!;
     private Button _btnExit = null!;
     private Button _btnChange = null!;
+    private Button _btnDelete = null!;
 
     private Button CreateButton(string text, int x, int y, int w)
         => new() { Text = text, Location = new Point(x, y), Width = w };
@@ -113,8 +142,19 @@ public sealed class PasswordDialog : Form
             return;
         }
 
+        if (action == PasswordAction.DeleteAll)
+        {
+            var confirm = MessageBox.Show(this,
+                "Xóa toàn bộ ExamGuard?\n\nTất cả file, cấu hình, autostart và watchdog trên máy này sẽ bị xóa.\nKhông thể hoàn tác!",
+                "ExamGuard", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+            if (confirm != DialogResult.OK)
+                return;
+        }
+
         _lockout.Reset();
         _txtPassword.Clear();
+        UnlockDurationMinutes =
+            int.TryParse((string?)_cboMinutes.SelectedItem, out int minutes) ? Math.Max(1, minutes) : 60;
         Result = action;
         DialogResult = DialogResult.OK;
         Close();
