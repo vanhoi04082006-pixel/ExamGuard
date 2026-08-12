@@ -41,14 +41,16 @@ dotnet test ExamGuard.sln
 | 20 | Mật khẩu đúng → Mở khóa | Chặn tạm dừng, tự khóa lại sau thời gian cấu hình | |
 | 21 | Mật khẩu đúng → Thoát | Thoát hẳn, watchdog không khởi động lại | |
 | 22 | Alt+F4 / Task Manager "End task" hộp thoại | Không tắt được | |
-| 23 | Giết tiến trình --service | Watchdog khởi động lại trong ~2-5s | |
-| 24 | Khởi động lại máy | Tự chạy ẩn sau đăng nhập | |
+| 23 | Giết tiến trình --service | Watchdog khởi động lại trong ~2-8s | |
+| 24 | Giết CẢ service + watchdog cùng lúc | Task Scheduler khôi phục trong ~1 phút | |
+| 25 | Khởi động 2 bản --service cùng lúc | Bản thứ 2 tự thoát, không sinh zombie | |
+| 26 | Khởi động lại máy | Tự chạy ẩn sau đăng nhập | |
 
 ### B4. Đóng gói
 | # | Kiểm tra | Kết quả mong đợi | Pass? |
 |---|---|---|---|
-| 25 | `artifacts\...\ExamGuard.exe` | 1 file duy nhất, tự chạy trên máy không cài .NET | |
-| 26 | Chạy trên Windows 11 sạch (VM) | Toàn bộ B1-B3 OK | |
+| 27 | `artifacts\...\ExamGuard.exe` | 1 file duy nhất, tự chạy trên máy không cài .NET | |
+| 28 | Chạy trên Windows 11 sạch (VM) | Toàn bộ B1-B3 OK | |
 
 ## C. Ghi chú khi fail
 - Ghi lại app đang test, phiên bản Windows, log nếu có.

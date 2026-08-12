@@ -25,7 +25,9 @@ ExamGuard.exe --init
    VD: `C:\Program Files\ExamGuard\`.
    (Chỉ cần quyền ghi thư mục đó vì app ghi file cấu hình cạnh exe.)
 2. Chạy `ExamGuard.exe --service` một lần để bật autostart
-   (viết registry `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`).
+   (viết registry `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`) và đăng ký
+   **Task Scheduler** `ExamGuardWatchdog` (chạy mỗi phút, dùng để cứu hệ thống khi
+   cả service lẫn watchdog bị giết).
 3. Đăng xuất/đăng nhập lại → ExamGuard tự chạy ẩn cùng phiên làm việc.
 
 ## Bước 4 - Kiểm tra nhanh tại chỗ
@@ -49,7 +51,8 @@ ExamGuard.exe --init
 - **Đổi mật khẩu**: hotkey → Đổi mật khẩu (cần mật khẩu hiện tại).
 - **Nâng cấp bản mới**: copy file exe mới đè lên, giữ `examguard.json`.
 - **Gỡ cài đặt**: xóa thư mục + xóa giá trị `ExamGuard` trong
-  `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`.
+  `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` + xóa task
+  `ExamGuardWatchdog` (lệnh `schtasks /Delete /F /TN ExamGuardWatchdog`).
 
 ## Lưu ý
 - Nếu máy trạm chạy antivirus: cấu hình ngoại lệ cho thư mục cài đặt nếu bị chặn

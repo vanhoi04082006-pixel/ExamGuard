@@ -9,45 +9,73 @@ namespace ExamGuard.App.Services;
 /// </summary>
 public static class Watchdog
 {
-    private static readonly Mutex ServiceMutex = new(initiallyOwned: true, ProcessGuard.ServiceMutexName);
+    // IMPORTANT: ServiceMutex must NOT be initiallyOwned. `initiallyOwned: true`
+    // would give the watchdog permanent ownership (recursion depth >= 1 forever),
+    // locking every newly started service out of the mutex.
+    private static readonly Mutex ServiceMutex = new(initiallyOwned: false, ProcessGuard.ServiceMutexName);
     private static readonly Mutex WatchdogMutex = new(initiallyOwned: true, ProcessGuard.WatchdogMutexName);
 
     public static void Run()
     {
         // Holding WatchdogMutex marks this process as "a watchdog is present" so
         // that a freshly started service does not spawn a duplicate.
-        try { WatchdogMutex.WaitOne(0); } catch (AbandonedMutexException) { }
+        bool watchdogAcquired;
+        try { watchdogAcquired = WatchdogMutex.WaitOne(0); }
+        catch (AbandonedMutexException) { watchdogAcquired = true; }
+        FileLog.Write($"watchdog start, mutexAcquired={watchdogAcquired}");
+        if (!watchdogAcquired)
+            return; // Another watchdog is alive; this one (e.g. from Task Scheduler) stands down.
 
-        string exePath = Environment.ProcessPath ?? string.Empty;
-        while (true)
+        try
         {
-            bool acquired = false;
-            try
+            string exePath = Environment.ProcessPath ?? string.Empty;
+            DateTime lastRestart = DateTime.MinValue;
+            while (true)
             {
-                acquired = ServiceMutex.WaitOne(0);
-            }
-            catch (AbandonedMutexException)
-            {
-                acquired = true;
-            }
-
-            if (acquired)
-            {
+                bool acquired = false;
                 try
                 {
-                    if (File.Exists(ProcessGuard.StoppedFlagPath))
-                        return; // Intentional teacher exit: stand down.
-
-                    ProcessGuard.ClearStopFlag();
-                    StartService(exePath);
+                    acquired = ServiceMutex.WaitOne(0);
                 }
-                finally
+                catch (AbandonedMutexException)
                 {
-                    ServiceMutex.ReleaseMutex();
+                    acquired = true;
                 }
-            }
 
-            Thread.Sleep(2000);
+                if (acquired)
+                {
+                    // Grace period: a service we just started may still be on its
+                    // way to claiming the mutex. Do not spawn a duplicate.
+                    if ((DateTime.UtcNow - lastRestart).TotalSeconds < 6)
+                    {
+                        try { ServiceMutex.ReleaseMutex(); } catch { }
+                        Thread.Sleep(2000);
+                        continue;
+                    }
+
+                    try
+                    {
+                        if (File.Exists(ProcessGuard.StoppedFlagPath))
+                            return; // Intentional teacher exit: stand down.
+
+                        ProcessGuard.ClearStopFlag();
+                        lastRestart = DateTime.UtcNow;
+                        FileLog.Write("restarting service");
+                        StartService(exePath);
+                    }
+                    finally
+                    {
+                        try { ServiceMutex.ReleaseMutex(); } catch { }
+                    }
+                }
+
+                Thread.Sleep(2000);
+            }
+        }
+        finally
+        {
+            try { WatchdogMutex.ReleaseMutex(); }
+            catch { }
         }
     }
 

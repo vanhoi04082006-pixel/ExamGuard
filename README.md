@@ -10,7 +10,7 @@ Công cụ Windows chạy nền cho phòng thực hành lập trình: **chặn C
 - Hotkey bí mật mặc định: **`Ctrl + Alt + Shift + G`** → mở hộp thoại mật khẩu.
 - Mật khẩu: SHA-256 + salt; sai 3 lần → khóa 30 giây.
 - Khóa tự động khóa lại sau thời gian mở khóa (mặc định 60 phút).
-- Chống tắt: watchdog tự khởi động lại nếu tiến trình chính bị giết.
+- Chống tắt 3 lớp: watchdog tự khởi động lại (2s), service định kỳ kiểm tra watchdog (5s), và Task Scheduler cứu khi cả 2 bị giết cùng lúc (~1 phút).
 - Tự động chạy cùng hệ thống (registry Run).
 - Đóng gói 1 file `.exe` duy nhất.
 

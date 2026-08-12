@@ -24,6 +24,7 @@ public sealed class GuardForm : Form
     private readonly LockoutGuard _lockout = new();
     private readonly KeyboardHook _keyboardHook = new();
     private readonly System.Windows.Forms.Timer _relockTimer;
+    private readonly System.Windows.Forms.Timer _watchdogTimer;
     private bool _unlocked;
     private bool _dialogOpen;
     private bool _exiting;
@@ -45,6 +46,9 @@ public sealed class GuardForm : Form
             _unlocked = false;
             _relockTimer.Stop();
         };
+
+        _watchdogTimer = new System.Windows.Forms.Timer { Interval = 5000 };
+        _watchdogTimer.Tick += (_, _) => Watchdog.EnsureRunning();
     }
 
     protected override void OnHandleCreated(EventArgs e)
@@ -61,17 +65,44 @@ public sealed class GuardForm : Form
         Hide();
         ProcessGuard.ClearStopFlag();
 
-        // Register auto-start at logon (idempotent).
+        FileLog.Write("service OnLoad begin");
+
+        // Claim the run mutex FIRST so the watchdog stops restarting us as soon
+        // as possible; slow work below must not delay this. If we cannot claim it
+        // within a few seconds we are a duplicate instance (e.g. racing the Task
+        // Scheduler watchdog) and must exit quietly instead of becoming a zombie.
+        for (int waitSeconds = 0; ; waitSeconds++)
+        {
+            try
+            {
+                if (ServiceMutex.WaitOne(1000))
+                    break;
+            }
+            catch (AbandonedMutexException)
+            {
+                break; // Owned an abandoned mutex: we hold it now.
+            }
+            if (waitSeconds >= 5)
+            {
+                FileLog.Write("duplicate service instance, exiting");
+                _exiting = true;
+                Close();
+                return;
+            }
+        }
+
         string? exePath = Environment.ProcessPath;
         if (!string.IsNullOrEmpty(exePath))
+        {
             AutoStart.Enable(exePath);
-
-        // Hold the run mutex for this process's lifetime; the watchdog uses it
-        // to detect whether the service is alive.
-        try { ServiceMutex.WaitOne(); } catch (AbandonedMutexException) { }
+            TaskSchedulerHelper.Register(exePath);
+        }
 
         _keyboardHook.ShouldBlock = ShouldBlockKeys;
         _keyboardHook.Install();
+
+        // Keep a watchdog sibling alive even if a student kills it.
+        _watchdogTimer.Start();
 
         if (!NativeMethods.AddClipboardFormatListener(Handle))
         {
@@ -85,6 +116,7 @@ public sealed class GuardForm : Form
         ClipboardGuard.ClearTextIfPresent();
 
         Watchdog.EnsureRunning();
+        FileLog.Write("service startup complete");
     }
 
     protected override void WndProc(ref Message m)
@@ -124,6 +156,7 @@ public sealed class GuardForm : Form
             _keyboardHook.Dispose();
             NativeMethods.RemoveClipboardFormatListener(Handle);
             _relockTimer.Dispose();
+            _watchdogTimer.Dispose();
             try { ServiceMutex.ReleaseMutex(); } catch { }
         }
         base.Dispose(disposing);
@@ -156,6 +189,7 @@ public sealed class GuardForm : Form
                     break;
                 case PasswordAction.Exit:
                     ProcessGuard.WriteStopFlag();
+                    TaskSchedulerHelper.Remove();
                     _exiting = true;
                     Close();
                     break;
