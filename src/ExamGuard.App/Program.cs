@@ -10,6 +10,8 @@ internal static class Program
     {
         bool watchdogMode = args.Contains("--watchdog", StringComparer.OrdinalIgnoreCase);
         bool initMode = args.Contains("--init", StringComparer.OrdinalIgnoreCase);
+        bool manualStart = !watchdogMode && !initMode
+                           && !args.Contains("--service", StringComparer.OrdinalIgnoreCase);
 
         if (watchdogMode)
         {
@@ -24,6 +26,6 @@ internal static class Program
         }
 
         ApplicationConfiguration.Initialize();
-        Application.Run(new GuardForm());
+        Application.Run(new GuardForm(manualStart));
     }
 }

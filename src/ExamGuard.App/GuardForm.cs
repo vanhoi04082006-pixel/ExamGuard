@@ -29,9 +29,11 @@ public sealed class GuardForm : Form
     private bool _unlocked;
     private bool _dialogOpen;
     private bool _exiting;
+    private readonly bool _manualStart;
 
-    public GuardForm()
+    public GuardForm(bool manualStart = false)
     {
+        _manualStart = manualStart;
         _store = new ConfigStore();
         _config = _store.Load();
 
@@ -125,6 +127,21 @@ public sealed class GuardForm : Form
 
         Watchdog.EnsureRunning();
         FileLog.Write("service startup complete");
+
+        if (_manualStart)
+            ShowStartupToast();
+    }
+
+    private void ShowStartupToast()
+    {
+        try
+        {
+            var toast = new ToastForm(
+                "ExamGuard đang chạy ẩn và bảo vệ máy.\nBấm Ctrl+Alt+Shift+G để mở hộp thoại quản lý.");
+            toast.FormClosed += (_, _) => toast.Dispose();
+            toast.Show();
+        }
+        catch { }
     }
 
     protected override void WndProc(ref Message m)

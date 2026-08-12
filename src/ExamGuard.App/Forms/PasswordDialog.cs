@@ -297,6 +297,7 @@ internal sealed class ChangePasswordForm : Form
         MinimizeBox = false;
         ShowIcon = false;
         StartPosition = FormStartPosition.CenterParent;
+        TopMost = true;
         AutoSize = true;
         AutoSizeMode = AutoSizeMode.GrowAndShrink;
         Font = new Font("Segoe UI", 9F);
