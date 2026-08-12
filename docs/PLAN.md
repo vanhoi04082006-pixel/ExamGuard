@@ -35,7 +35,7 @@ ExamGuard.sln
 │                           Watchdog, Initializer, LockoutGuard
 ├─ tests/ExamGuard.Core.Tests/  xUnit
 ├─ scripts/publish.ps1      đóng gói 1 file exe
-└─ docs/                    README, DEPLOYMENT, TESTPLAN
+└─ docs/                    README, GIAOVIEN, DEPLOYMENT, TESTPLAN
 ```
 
 ## Phân công 3 thành viên / 4 ngày
