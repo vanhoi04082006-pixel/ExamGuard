@@ -182,7 +182,10 @@ public sealed class GuardForm : Form
         _dialogOpen = true;
         try
         {
-            using var dlg = new PasswordDialog(_config, _store, _lockout);
+            // Reload every time so a password changed out-of-band (e.g. --init or
+            // another process) takes effect immediately instead of verifying against
+            // the stale copy held since startup.
+            using var dlg = new PasswordDialog(_store.Load(), _store, _lockout);
             dlg.Shown += (_, _) => FlashSelf(dlg);
             var result = dlg.ShowDialog(this);
             if (result != DialogResult.OK)
