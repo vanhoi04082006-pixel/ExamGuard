@@ -1,4 +1,4 @@
-namespace ExamGuard.App.Services;
+namespace ExamGuard.Core.Security;
 
 /// <summary>
 /// Simple brute-force deterrent: after a number of failed password attempts the
@@ -31,5 +31,9 @@ public sealed class LockoutGuard
         }
     }
 
-    public void Reset() => _failures = 0;
+    public void Reset()
+    {
+        _failures = 0;
+        _lockedUntil = DateTime.MinValue;
+    }
 }

@@ -63,7 +63,7 @@ public sealed class KeyboardHook : IDisposable
         return NativeMethods.CallNextHookEx(_hookHandle, nCode, wParam, lParam);
     }
 
-    private static bool IsBlockedCombo(uint vkCode, bool isCtrl, bool isShift)
+    internal static bool IsBlockedCombo(uint vkCode, bool isCtrl, bool isShift)
     {
         bool isCVX = vkCode is NativeMethods.VK_C or NativeMethods.VK_X or NativeMethods.VK_V;
 
