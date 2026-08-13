@@ -1,3 +1,4 @@
+using System.Security.Principal;
 using ExamGuard.Core.Configuration;
 
 namespace ExamGuard.App.Services;
@@ -12,13 +13,48 @@ public static class Initializer
     {
         var store = new ConfigStore();
         var config = store.Load();
+
+        // When a password already exists, resetting it via --init lets anyone
+        // with access to the exe take over the machine. Require an elevated
+        // (administrator) token so only the teacher can reset it.
+        if (config.HasPassword && !IsElevated())
+        {
+            MessageBox.Show(
+                "Đã có mật khẩu. Để đặt lại mật khẩu cần chạy ExamGuard với quyền quản trị viên\n" +
+                "(nhấp phải file -> Chạy với tư cách quản trị viên).",
+                "ExamGuard - Từ chối", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
         var setup = new SetupPasswordForm();
         if (setup.ShowDialog() != DialogResult.OK)
             return;
         config.SetPassword(setup.NewPassword);
-        store.Save(config);
-        MessageBox.Show("Đã lưu mật khẩu mới.", "ExamGuard",
-            MessageBoxButtons.OK, MessageBoxIcon.Information);
+        if (store.Save(config))
+        {
+            MessageBox.Show("Đã lưu mật khẩu mới.", "ExamGuard",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        else
+        {
+            MessageBox.Show("Không thể lưu mật khẩu! Thư mục cài đặt không cho ghi.\n" +
+                            "Hãy chạy với quyền quản trị viên hoặc đổi nơi cài đặt.",
+                "ExamGuard", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private static bool IsElevated()
+    {
+        try
+        {
+            using var identity = WindowsIdentity.GetCurrent();
+            return new WindowsPrincipal(identity)
+                .IsInRole(WindowsBuiltInRole.Administrator);
+        }
+        catch
+        {
+            return false;
+        }
     }
 }
 

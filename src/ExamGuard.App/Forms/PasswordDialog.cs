@@ -270,8 +270,10 @@ public sealed class PasswordDialog : Form
         if (dlg.ShowDialog(this) == DialogResult.OK)
         {
             _config.SetPassword(dlg.NewPassword);
-            _store.Save(_config);
-            ShowStatus("Đã đổi mật khẩu thành công.", Color.ForestGreen);
+            if (_store.Save(_config))
+                ShowStatus("Đã đổi mật khẩu thành công.", Color.ForestGreen);
+            else
+                ShowStatus("Không thể lưu! Thư mục cài đặt không cho ghi.");
         }
     }
 

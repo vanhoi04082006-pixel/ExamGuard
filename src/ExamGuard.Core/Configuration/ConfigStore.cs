@@ -1,4 +1,5 @@
 using System.Text.Json;
+using ExamGuard.Core.Misc;
 
 namespace ExamGuard.Core.Configuration;
 
@@ -33,15 +34,26 @@ public sealed class ConfigStore
         }
     }
 
-    public void Save(AppConfig config)
+    /// <summary>Persists the config. Returns false (and logs) when the file
+    /// cannot be written, e.g. the install folder is not writable.</summary>
+    public bool Save(AppConfig config)
     {
         lock (_lock)
         {
-            string json = JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true });
-            string? dir = Path.GetDirectoryName(_filePath);
-            if (!string.IsNullOrEmpty(dir))
-                Directory.CreateDirectory(dir);
-            File.WriteAllText(_filePath, json);
+            try
+            {
+                string json = JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true });
+                string? dir = Path.GetDirectoryName(_filePath);
+                if (!string.IsNullOrEmpty(dir))
+                    Directory.CreateDirectory(dir);
+                File.WriteAllText(_filePath, json);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                FileLog.Write($"config save failed: {ex.Message}");
+                return false;
+            }
         }
     }
 }
