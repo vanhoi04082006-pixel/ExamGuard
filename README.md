@@ -80,5 +80,5 @@ ExamGuard.sln
 - Lớp "unkillable" (DACL) chỉ chặn được user **không có quyền admin**. User có quyền admin (hoặc nắm `SeDebugPrivilege`) vẫn kết thúc được tiến trình vì admin luôn có thể lấy lại quyền sở hữu/đặt lại DACL — đây là giới hạn của Windows, không phải lỗ hổng. Muốn mở khoá triệt để: đặt `"Unkillable": false` trong `examguard.json` rồi khởi động lại service.
 - Sau khi bật lớp DACL, service **không còn tự mở lại được chính mình với toàn quyền** (chỉ được query); nếu có nhu cầu đó, tắt `Unkillable`.
 
-- Hướng dẫn sử dụng cho giáo viên: `docs/GIAOVIEN.md`.
+- Hướng dẫn sử dụng cho giáo viên: `docs/GIAOVIEN.md` · bản đơn giản cho người dùng cuối: `docs/HUONGDAN-SU-DUNG.md`.
 - Xem chi tiết triển khai ở `docs/DEPLOYMENT.md` và kế hoạch kiểm thử ở `docs/TESTPLAN.md`.
