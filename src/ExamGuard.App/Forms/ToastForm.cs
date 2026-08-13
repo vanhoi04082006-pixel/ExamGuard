@@ -23,7 +23,7 @@ internal sealed class ToastForm : Form
         Font = new Font("Segoe UI", 9.5F);
         AutoSize = true;
         AutoSizeMode = AutoSizeMode.GrowAndShrink;
-        Opacity = 0;
+        Opacity = 1;
 
         var root = new TableLayoutPanel
         {
