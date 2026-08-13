@@ -28,12 +28,14 @@ public sealed class KeyboardHook : IDisposable
     {
         if (_hookHandle != IntPtr.Zero)
             return;
-        using var process = System.Diagnostics.Process.GetCurrentProcess();
-        using var module = process.MainModule!;
+        // GetModuleHandle(null) returns the current process's own base module
+        // handle without opening the process, so it keeps working even after
+        // ProcessProtector has denied PROCESS_VM_READ to everyone (which would
+        // make Process.MainModule throw "Access is denied" for non-elevated runs).
         _hookHandle = NativeMethods.SetWindowsHookEx(
             NativeMethods.WH_KEYBOARD_LL,
             _proc,
-            NativeMethods.GetModuleHandle(module.ModuleName),
+            NativeMethods.GetModuleHandle(null),
             0);
     }
 
