@@ -29,6 +29,22 @@ dotnet test ExamGuard.sln
 | F1 | `examguard.json` rác → không crash (fallback setup) | ✅ |
 | F2/E4/F4 | Save fail trả false (unit test); UnlockMinutes đọc từ config (unit test) | ✅ |
 
+## A3. Kiểm thử E2E GUI (máy dev, user xác nhận) — tất cả PASS
+| # | Kịch bản | Kết quả |
+|---|---|---|
+| A5 | Toast khởi động khi double-click (hiện ngay, tự đóng ~4s) — sau khi fix bug Opacity | ✅ |
+| B4 | Task Manager End task (admin kill được — giới hạn Windows; watchdog tự restart ~2s) | ✅ |
+| C1/C2 | Ctrl+C text khi khóa → clipboard bị xóa | ✅ |
+| C3 | Copy file trong Explorer → copy được | ✅ |
+| C5 | Menu chuột phải Copy text → clipboard bị xóa | ✅ |
+| C7 | Sau khi Mở khóa → copy text OK | ✅ |
+| C8 | Hết thời gian mở khóa → tự khóa lại | ✅ |
+| C9 | File-drop (CF_HDROP) được giữ khi khóa | ✅ |
+| D1 | Ctrl+Alt+Shift+G → dialog hiện trên mọi cửa sổ | ✅ |
+| D2 | Sai mật khẩu ×3 → khóa 30s | ✅ |
+| D3 | Mật khẩu đúng + chọn thời gian → Mở khóa | ✅ |
+| D7 | Alt+F4 trên dialog → không đóng được service | ✅ |
+
 ## B. Kiểm thử thủ công trên máy thật (VM phòng máy)
 
 ### B1. Chặn văn bản
