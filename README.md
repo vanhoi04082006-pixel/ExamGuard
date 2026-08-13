@@ -81,4 +81,5 @@ ExamGuard.sln
 - Sau khi bật lớp DACL, service **không còn tự mở lại được chính mình với toàn quyền** (chỉ được query); nếu có nhu cầu đó, tắt `Unkillable`.
 
 - Hướng dẫn sử dụng cho giáo viên: `docs/GIAOVIEN.md` · bản đơn giản cho người dùng cuối: `docs/HUONGDAN-SU-DUNG.md`.
+- Mô tả tính năng: `docs/TINH-NANG.md`.
 - Xem chi tiết triển khai ở `docs/DEPLOYMENT.md` và kế hoạch kiểm thử ở `docs/TESTPLAN.md`.
